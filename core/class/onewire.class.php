@@ -279,7 +279,7 @@ public function dontRemoveCmd() {
 		return false;
 }
 
-public function AddSendHistory($sensor_id,$sensor_class,$sensor_value,$history_type){
+public static function AddSendHistory($sensor_id,$sensor_class,$sensor_value,$history_type){
 	$sql = 'INSERT INTO
 					onewire_send_history SET
 						sensor_id = "'.$sensor_id.'",
@@ -291,7 +291,7 @@ public function AddSendHistory($sensor_id,$sensor_class,$sensor_value,$history_t
 }
 
 
-public function getHistoryCall($sensor_id){
+public static function getHistoryCall($sensor_id){
 
     $sql = 'select * from 	onewire_send_history where sensor_id = "'.$sensor_id.'" ORDER BY date_add DESC ';
     $result =  DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
@@ -303,7 +303,7 @@ public function getHistoryCall($sensor_id){
 
 
 
-public function getclass($name,$group=false,$ajax=true){
+public static function getclass($name,$group=false,$ajax=true){
         $sql = 'SELECT class, class2 from onewire where name like( "'.$name.'" )'.($group ? ' AND groupe like ("'.$group.'")  ' : '');
         $result =  DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
         //$result = Tools::ExecuteS($sql);
@@ -332,7 +332,7 @@ public function getclass($name,$group=false,$ajax=true){
         }
     }
 
-public function getgroup($name){
+public static function getgroup($name){
         $sql = 'SELECT  groupe from  onewire where name like ("'.$name.'")';
         $result =  DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
         //$result = Tools::ExecuteS($sql);
@@ -343,7 +343,7 @@ public function getgroup($name){
         echo json_encode($tabgroup);
     }
 
-public function getIsgroup($name){
+public static function getIsgroup($name){
         $sql = 'SELECT count(*) as nb  from onewire where name like ("'.$name.'") and groupe != "" and groupe is not null';
         $result =  DB::Prepare($sql, array(), DB::FETCH_TYPE_ROW);
         //$result = Tools::getRow($sql);
@@ -353,7 +353,7 @@ public function getIsgroup($name){
             echo json_encode('ko');
     }
 
-    public function AjaxsendParameter($param,$sensor_id,$valeur,$eq){
+	public static function AjaxsendParameter($param,$sensor_id,$valeur,$eq){
 
         $equipement = eqLogic::byId($eq);
 		$port = ($equipement->getConfiguration('onewire_portssh') != '' ? $equipement->getConfiguration('onewire_portssh')  : '4304');
@@ -368,7 +368,7 @@ public function getIsgroup($name){
          }
     }
 
-    public function getComposants(){
+	public static function getComposants(){
         $sql = 'SELECT id,name  from onewire group by name';
          $result = DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
         echo  json_encode($result);
@@ -381,7 +381,7 @@ public function mailAlert($obj,$value){
 
 	if($plugin_email /*&& $plugin_virtuel */ && (int)$this->getConfiguration('mail_error')>0){
 		//log::add('onewireMail', 'info', 'Email installé et commande en alerte');
-		onewireCmd::OneWireSendMail($obj,$value);
+		$this->OneWireSendMail($obj,$value);
 	}else{
 		if( (int)$this->getConfiguration('mail_error')>0)
 	     log::add('onewireMail', 'info', 'Il faut installer le plugin mail  pour utiliser les mails ');
@@ -409,7 +409,7 @@ function OneWireSendMail($obj,$value/*,$virtuel*/){
 
     $equipement = $obj->getEqLogic();
 	$date = new DateTime();
-	$minute  =self::DateDiff($obj->getConfiguration('mail_timestamp'));
+	$minute  =$this->DateDiff($obj->getConfiguration('mail_timestamp'));
 	log::add('onewireMail', 'info', 'nb minute :'.$value.' > '.$obj->getConfiguration('value_mail').'  && ((int) '.$obj->getConfiguration('mail_send').'==0 || ( (int) '.$obj->getConfiguration('mail_send').'==1 && ('.$minute.' >  '.$obj->getConfiguration('time_mail').' && '.$obj->getConfiguration('time_mail').' !=0 )))');
 	switch ($obj->getConfiguration('AlertType')) {
     case "supp":
@@ -617,7 +617,7 @@ public function TypeOwserver($ajax=false){
 			}
 		}else{
 			log::add('onewire', 'debug', 'MODE OWFS ('.$equipement->getConfiguration('onewire_mode').')');
-			return onewireCmd::TypeOwserver($ajax);
+			return $this->TypeOwserver($ajax);
 		}
     }
 
@@ -675,7 +675,7 @@ public function TypeOwserver($ajax=false){
 
 	    /*Gestion des alertes*/
        // if((int)$this->getConfiguration('mail_error') > 0)
-        onewireCmd::MailAlert($this,$temp);
+		$this->mailAlert($this,$temp);
         if($temp !== null){//$temp!=0
 
 				//DS2438 voir la doc mais il faut appliquer une formule */

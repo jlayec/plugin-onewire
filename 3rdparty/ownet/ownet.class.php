@@ -184,11 +184,13 @@ class OWNet{
 	private function disconnect(){
 		// disconnect link
 		if ($this->link_type==OWNET_LINK_TYPE_SOCKET){		// socket
-			@socket_set_block($this->link);
-			if ($this->sock_type==OWNET_LINK_TYPE_TCP)
-				@socket_shutdown($this->link,2);
-			@socket_close($this->link);
-		}else{
+			if ($this->link instanceof \Socket || is_resource($this->link)){
+				@socket_set_block($this->link);
+				if ($this->sock_type==OWNET_LINK_TYPE_TCP)
+					@socket_shutdown($this->link,2);
+				@socket_close($this->link);
+			}
+		}elseif (is_resource($this->link)){
 			@fclose($this->link);				// streams
 		}
 		$this->link=NULL;

@@ -426,30 +426,6 @@ function getClassOrGroup(Composantname,my_cmd) {
     });
 }
 
-jeedom.cmd.availableMailTemplate = function(cmd_id,mail_is_install/*,virtuel_is_install*/) {
-
-/*Test si le plugin mail est bien installer */
-if(mail_is_install!=1/* || virtuel_is_install!=1*/) return;
-
-//console.debug(cmd_id);
- var selTypeAlert = '<option  value="">Choisir</option>';
- if(ListEmail =="none") return;
-
-    var my_cmd = '';
-    if(cmd_id!='')
-        var my_cmd = '#select_mail_alert_'+cmd_id;
-        var MailTemplate = $(my_cmd+' .selected_MailTemplate').attr('MailTemplate');
-
-          $.each(ListEmail, function(key, val){
-                var selected = '';
-                if(MailTemplate==key)
-                    selected ='selected="selected"';
-
-                selTypeAlert += '<option '+selected+' value="'+key+'">'+val+'</option>';
-            });
-             $(my_cmd+' .SelectMailTemplate').append(selTypeAlert);
-}
-
 function getComposants(cmd_id) {
 
     var my_cmd = '';
@@ -501,17 +477,6 @@ function getComposants(cmd_id) {
         }
     });
 }
-jeedom.cmd.availableAlertType = function () {
-
-  selAlertType = '<select  style="width:60px" class="SelectAlertType cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="AlertType">';
-    selAlertType += '<option value=""></option>';
-    selAlertType += '<option value="supp">></option>';
-    selAlertType += '<option value="inf"><</option>';
-    selAlertType += '<option value="egal">=</option>';
-    selAlertType += '</select>';
-    return selAlertType;
-};
-
 $('body').delegate('.cmd .cmdAction[data-action=configurebus]', 'click', function () {
 
 	var id_cmd = $(this).parent().parent().data('cmd_id');
@@ -524,35 +489,13 @@ $('body').delegate('.cmd .cmdAction[data-action=configurebus]', 'click', functio
 
 });
 
-$('body').delegate('.cmd .cmdAttr[data-l2key=mail_error]', 'change', function () {
-	//console.debug($(this).value());
-
-
-    if ($(this).value() == 1 && pluginEmail==1/* && pluginVirtuel == 1*/) {
-		$('#div_'+$(this).attr('name')).show();
-		$('#div_'+$(this).attr('name')).removeClass('hide');
-    } else {
-    	$('#div_'+$(this).attr('name')).hide();
-		$('#div_'+$(this).attr('name')).addClass('hide');
-
-    }
-});
-
 jeedom.cmd.availablecomposants = function(nb_cmd) {
 	getComposants(nb_cmd);
 }
 
-function getMarket(id){
-    $('#md_modal2').dialog({title: "{{Market Jeedom}}"});
-	$('#md_modal2').load('index.php?v=d&modal=market.display&type=plugin&id='+id).dialog('open');
-
-}
-
 function addCmdToTable(_cmd) {
-	var newcmd = false;
     if (!isset(_cmd)) {
         var _cmd = {configuration: {}};
-		newcmd = true;
     }
 	if (init(_cmd.logicalId) == 'refresh') {
 		return;
@@ -619,27 +562,6 @@ function addCmdToTable(_cmd) {
    tr += '<span >Inverser: <input type="checkbox" class=" cmdAttr" data-label-text="{{Inverser}}" data-l1key="display" data-l2key="invertBinary" /> <br/></span>';
 
 
-    tr += '<span>Mail: <input type="checkbox" name="mail_alert_'+nb_cmd+'" class=" cmdAttr"   data-label-text="{{Mail}}" data-l1key="configuration" data-l2key="mail_error"/><br/></span>';
-
-//#http://doc.jeedom.fr/fr_FR/mail.html#changelog
-    tr += '<div class="installmail">Merci d\'installer le plugin <a class="link_mail" href="javascript:getMarket(22)">E-mail</a></div>';
-   // tr += '<div class="installvirtual">Merci d\'installer le plugin <a class="link_virtuel" href="javascript:getMarket(21)">Virtuel</a></div>';
-
-    tr += '<div class="param_mail" id="div_mail_alert_'+nb_cmd+'">Lorsque la valeur est :  <br>';
-    tr += '<span style="float:left;" class="AlertType" AlertType="' + init(_cmd.configuration.AlertType) + '">' + jeedom.cmd.availableAlertType() + '</span>';
-    tr += '<span style="float:left;margin : 5px 5px 0px 5px">à</span><span style="float:left;"> <input  class="cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="value_mail"   style="width:60px;"></span>';
-
-    tr += '<div class="view_mail" id="select_mail_alert_'+nb_cmd+'">';
-     tr += ' <div style="clear:both;padding-top: 4px;">Mail : <br>';
-     tr += '<span class="class selected_MailTemplate" MailTemplate="' + init(_cmd.configuration.MailTemplate) + '">';
-    tr += '<select   style="margin-top: 3px;" class="SelectMailTemplate cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="MailTemplate">';
-    tr += '</select></span>';
-    tr += '</div>';
-     tr += ' <div style="clear:both;float:left;padding-top: 4px;line-height: 27px;">Alerter toute les : ';
-    tr += '<span style="float:right;"> <input  class="cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="time_mail"   style="float:left;width:60px;">min</span>';
-  tr += '</div>';
-  
-
     tr += '</td>';
     tr += '<td>';
 
@@ -671,33 +593,6 @@ function addCmdToTable(_cmd) {
             tr.setValues(_cmd, '.cmdAttr');
             jeedom.cmd.changeType(tr, init(_cmd.subType));
 
-            if(pluginEmail==1 /*&& pluginVirtuel == 1*/){
-				$('.installmail').hide();
-			//	$('.installvirtual').hide();
-			}else{
-				$('.installmail').hide();
-				//$('.installvirtual').hide();
-
-			 if(!pluginEmail)
-			 	    $('.installmail').show();
-
-				$('.view_mail').hide();
-				$('.param_mail').hide();
-			}
-			if(newcmd){
-			        $('#div_mail_alert_'+nb_cmd).hide();
-					$('#div_mail_alert_'+nb_cmd).addClass('hide');
-	        }else{
-			        if(typeof _cmd.configuration.mail_error == "undefined"){
-							$('#div_mail_alert_'+nb_cmd).hide();
-							$('#div_mail_alert_'+nb_cmd).addClass('hide');
-					}else if(_cmd.configuration.mail_error==0){
-						    $('#div_mail_alert_'+nb_cmd).hide();
-							$('#div_mail_alert_'+nb_cmd).addClass('hide');
-			        }
-			}
-
-			jeedom.cmd.availableMailTemplate(nb_cmd,pluginEmail/*,pluginVirtuel*/);
             // jeedom.cmd.changecomposantName(tr, init(_cmd.composantName));
         }
     });

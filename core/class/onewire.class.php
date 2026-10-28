@@ -374,100 +374,6 @@ public static function getIsgroup($name){
         echo  json_encode($result);
     }
 
-public function mailAlert($value){
-  //  log::add('onewireMail', 'info', 'Fonction mailAlert');
-	$plugin_email = ((int)config::byKey('active', 'mail')>0 ? true : false);
-	//$plugin_virtuel = ((int)config::byKey('active', 'virtual')>0 ? true : false);
-
-	if($plugin_email /*&& $plugin_virtuel */ && (int)$this->getConfiguration('mail_error')>0){
-		//log::add('onewireMail', 'info', 'Email installé et commande en alerte');
-		$this->OneWireSendMail($value);
-	}else{
-		if( (int)$this->getConfiguration('mail_error')>0)
-	     log::add('onewireMail', 'info', 'Il faut installer le plugin mail  pour utiliser les mails ');
-	}
-}
-
-
-
-	function DateDiff($timestamp)
-	{
-		$difference = time()-$timestamp;
-		$jour = floor($difference/86400);
-		// le % signifie modulo qui permet de récuperer le reste d'une division
-		$reste = ($difference%86400);
-		$heure = floor($reste/3600);
-		$reste = ($difference%3600);
-		$minute = floor($reste/60);
-		return $minute;
-
-		//return $jour.' jour(s), '.$heure.' heure(s) et '.$minute.' minute(s)';
-	}
-
-
-public function OneWireSendMail($value){
-
-    $equipement = $this->getEqLogic();
-	$date = new DateTime();
-	$minute  =$this->DateDiff($this->getConfiguration('mail_timestamp'));
-	log::add('onewireMail', 'info', 'nb minute :'.$value.' > '.$this->getConfiguration('value_mail').'  && ((int) '.$this->getConfiguration('mail_send').'==0 || ( (int) '.$this->getConfiguration('mail_send').'==1 && ('.$minute.' >  '.$this->getConfiguration('time_mail').' && '.$this->getConfiguration('time_mail').' !=0 )))');
-	switch ($this->getConfiguration('AlertType')) {
-    case "supp":
-
-      if($value > $this->getConfiguration('value_mail')  && ((int) $this->getConfiguration('mail_send')==0 || ( (int) $this->getConfiguration('mail_send')==1 && ($minute >  $this->getConfiguration('time_mail') && $this->getConfiguration('time_mail') !=0 )))){
-				log::add('onewireMail', 'info', 'Mail configuré ');
-				/*envoyer mail */
-			   $eqLogic_m = eqLogic::byId($this->getConfiguration('MailTemplate'));
-  			   foreach ($eqLogic_m->getCmd() as $cmd_email) {
-				    log::add('onewireMailSend', 'info', 'Mail envoyé. Composant '.$this->getConfiguration('instanceId').' '.$equipement->getName().' '.$this->getName().' '.$this->getConfiguration('composantClass').' Valeur : '.$value.' Message :'.$eqLogic_m->getConfiguration('fromName').'---'.$cmd_email->getName());
-					 $info = array('title'=>$eqLogic_m->getConfiguration('fromName'),'message'=>$cmd_email->getName());
-				     $cmd_email->execCmd($info);
-				 }
-
-				/*topé mail envoyé*/
-		        $this->setConfiguration('mail_send', 1);
-		        $this->setConfiguration('mail_timestamp', $date->getTimestamp());
-                $this->save();
-      }else{
-			  log::add('onewireMail', 'info', 'mail non envoyé :  '.$value.' > '.$this->getConfiguration('value_mail').'  && '.$this->getConfiguration('mail_send'));
-      }
-        break;
-    case "inf":
-                if($value < $this->getConfiguration('value_mail')  && ((int) $this->getConfiguration('mail_send')==0 || ( (int) $this->getConfiguration('mail_send')==1  && ($minute >  $this->getConfiguration('time_mail') && $this->getConfiguration('time_mail') !=0 )))){
-				/*envoyer mail */
-			   $eqLogic_m = eqLogic::byId($this->getConfiguration('MailTemplate'));
-  			   foreach ($eqLogic_m->getCmd() as $cmd_email) {
-				     log::add('onewireMailSend', 'info', 'Mail envoyé. Composant '.$this->getConfiguration('instanceId').' '.$equipement->getName().' '.$this->getName().' '.$this->getConfiguration('composantClass').' Valeur : '.$value.' Message :'.$eqLogic_m->getConfiguration('fromName').'---'.$cmd_email->getName());
-					 $info = array('title'=>$eqLogic_m->getConfiguration('fromName'),'message'=>$cmd_email->getName());
-				     $cmd_email->execCmd($info);
-				 }
-
-				/*topé mail envoyé*/
-		        $this->setConfiguration('mail_send', 1);
-		        $this->setConfiguration('mail_timestamp', $date->getTimestamp());
-                $this->save();
-      }
-        break;
-    case "egal":
-       if($value == $this->getConfiguration('value_mail')  && ((int) $this->getConfiguration('mail_send')==0 || ( (int) $this->getConfiguration('mail_send')==1  && ($minute >  $this->getConfiguration('time_mail') && $this->getConfiguration('time_mail') !=0 )))){
-					/*envoyer mail */
-			   $eqLogic_m = eqLogic::byId($this->getConfiguration('MailTemplate'));
-  			   foreach ($eqLogic_m->getCmd() as $cmd_email) {
-				     log::add('onewireMailSend', 'info', 'Mail envoyé. Composant '.$this->getConfiguration('instanceId').' '.$equipement->getName().' '.$this->getName().' '.$this->getConfiguration('composantClass').' Valeur : '.$value.' Message :'.$eqLogic_m->getConfiguration('fromName').'---'.$cmd_email->getName());
-					 $info = array('title'=>$eqLogic_m->getConfiguration('fromName'),'message'=>$cmd_email->getName());
-				     $cmd_email->execCmd($info);
-				 }
-
-				/*topé mail envoyé*/
-		        $this->setConfiguration('mail_send', 1);
-		        $this->setConfiguration('mail_timestamp', $date->getTimestamp());
-                $this->save();
-      }
-        break;
-}
-
-
-}
 public function TypeGPIO_light_esclave($ajax=false){
 
 
@@ -673,9 +579,6 @@ public function TypeOwserver($ajax=false){
 		}
 
 
-	    /*Gestion des alertes*/
-       // if((int)$this->getConfiguration('mail_error') > 0)
-		$this->mailAlert($temp);
         if($temp !== null){//$temp!=0
 
 				//DS2438 voir la doc mais il faut appliquer une formule */

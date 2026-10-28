@@ -11,20 +11,7 @@ if (!isConnect('admin')) {
 //}
 
 
-$plugin_email = ((int)config::byKey('active', 'mail')>0 ? true : false);
-//$plugin_virtuel = ((int)config::byKey('active', 'virtual')>0 ? true : false);
-$listemail = array();
-if($plugin_email){
-   foreach (eqLogic::byType('mail') as $eqLogic) {
-     $listemail[$eqLogic->getId()] =$eqLogic->getHumanName();
-   }
-}
-
 $eqLogics = eqLogic::byType('onewire') ;
-sendVarToJS('ListEmail',$listemail);
-
-//sendVarToJS('pluginVirtuel',$plugin_virtuel);
-sendVarToJS('pluginEmail',$plugin_email);
 sendVarToJS('eqType', 'onewire');
 ?>
 

@@ -118,12 +118,14 @@ foreach (eqLogic::byType('onewire') as $eqLogic){
 				            <th  style="text-align:center">{{Identifiant}} : '.$user.'</th>
 				            <th  style="text-align:center"></th>
 				              <th  style="text-align:center"></th>
-				             </tr><tr>
+				              <th  style="text-align:center"></th>
+				             </tr>
 
 
 
 		                <tr>
-		                    <th>{{Liste des fichiers OWFS}}</th>';
+		                    <th>{{Liste des fichiers OWFS}}</th>
+		                    <th>{{Type de composant}}</th>';
 		                 if(count($tab_sondes)>0){
 		                   $txt .= ' <th  style="text-align:center">{{Existe}}</th>
 		                                <th style="text-align:center">{{Equipement}}</th>
@@ -136,7 +138,13 @@ foreach (eqLogic::byType('onewire') as $eqLogic){
 		                </thead>
 		                <tbody>';
 		                foreach($tab_sondes as $ss => $s){
+		                    $component_type = '-';
+		                    if($mode != 'gpio' && preg_match('/^[0-9a-f]{2}\.?[0-9a-f]{12}(?:\.[0-9a-f]{2})?$/i', $s)){
+		                        $type = $ow->read($folder.$s.'/type', false);
+		                        $component_type = ($type !== null && $type !== false && trim($type) !== '' ? trim($type) : '{{Indisponible}}');
+		                    }
 		                    $txt .= '<tr><td>'.$s.' </td>';
+		                    $txt .= '<td style="text-align:center">'.htmlspecialchars($component_type, ENT_QUOTES, 'UTF-8').'</td>';
 		                           if(count($tab_sondes)>0){
 										if(array_key_exists($s,$tab_conposant)){
 											$txt .='<td style="text-align:center"><span class="label label-success">Oui</span></td>';
